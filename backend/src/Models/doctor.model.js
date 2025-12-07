@@ -21,12 +21,17 @@ const doctorSchema = new Schema(
     address: {
       type: String,
     },
-    ssignedPatients: [
+    assignedPatients: [
       {
         type: Schema.Types.ObjectId,
         ref: "Patient",
       },
     ],
+    avatar: {
+      type: String,
+      default: null,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

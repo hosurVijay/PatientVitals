@@ -28,6 +28,11 @@ const appointmentSchema = new Schema(
       type: String,
       trim: true,
     },
+    appointmentHistory: [
+      {
+        type: String,
+      },
+    ],
 
     status: {
       type: String,

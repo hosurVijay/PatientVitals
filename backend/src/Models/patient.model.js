@@ -23,17 +23,28 @@ const patientSchema = new Schema(
     ],
     currentPrescription: [
       {
-        type: String,
+        medicines: [String],
+        prescribedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
     historyPrescription: [
       {
-        type: String,
+        medicines: [String],
+        prescribedAt: Date,
       },
     ],
     historyVisit: [
       {
-        type: String,
+        visitReason: {
+          type: String,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
     historyDocReferred: [
@@ -42,9 +53,14 @@ const patientSchema = new Schema(
         ref: "Doctor",
       },
     ],
-    adress: {
+    address: {
       type: String,
       required: true,
+    },
+    avatar: {
+      type: String,
+      default: null,
+      trim: true,
     },
   },
   { timestamps: true }
