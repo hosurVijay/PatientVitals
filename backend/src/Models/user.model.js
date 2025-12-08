@@ -45,12 +45,16 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
-    accessToken: {
-      type: String,
-      required: true,
-    },
     refreshToken: {
       type: String,
+    },
+    resetOtp: {
+      type: Number,
+      default: null,
+    },
+    otpExpiresIn: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }
@@ -80,6 +84,9 @@ userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       id: this._id,
+      email: this.email,
+      role: this.role,
+      phonenumber: this.phonenumber,
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
