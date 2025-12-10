@@ -173,8 +173,6 @@ const updatePassword = asyncHandler(async (req, res) => {
 });
 
 const sendOtp = asyncHandler(async (req, res) => {
-  console.log("REQ USER", req.user);
-  console.log("REQ USER", req.user.email);
   const userEmail = req.user?.email;
   console.log(userEmail);
 
