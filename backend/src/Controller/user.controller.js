@@ -24,7 +24,7 @@ const generateAccessRefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { email, phonenumber, password, username, fullname } = req.body;
+  const { email, phonenumber, password, username, fullname, role } = req.body;
 
   if (
     [email, password, phonenumber, username, fullname].some(
@@ -44,13 +44,15 @@ const registerUser = asyncHandler(async (req, res) => {
     username,
     email,
     phonenumber,
-    role: "patient",
+    role: role?.trim()?.toLowerCase() || "patient",
     password,
     fullname,
   });
 
-  const { refreshToken, accessToken } = generateAccessRefreshToken(user._id);
-  const createdUser = await findById(user._id).select(
+  const { refreshToken, accessToken } = await generateAccessRefreshToken(
+    user._id
+  );
+  const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
@@ -64,11 +66,16 @@ const registerUser = asyncHandler(async (req, res) => {
     sameSite: "Lax",
     maxAge: 10 * 24 * 60 * 60 * 1000,
   });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+  });
 
-  return (
-    res.status(200),
-    json(new ApiResponse(200, createdUser, "User created successfully"))
-  );
+  return res
+    .status(201)
+    .json(new ApiResponse(201, createdUser, "User created successfully"));
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -108,6 +115,12 @@ const login = asyncHandler(async (req, res) => {
     sameSite: "Lax",
     maxAge: 10 * 24 * 60 * 60 * 100,
   });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 10 * 24 * 60 * 60 * 100,
+  });
 
   return res
     .status(200)
@@ -116,7 +129,7 @@ const login = asyncHandler(async (req, res) => {
 
 const logOut = asyncHandler(async (req, res) => {
   const user = await User.findOneAndUpdate(
-    req.user?._id,
+    { _id: req.user?._id },
     {
       $unset: {
         refreshToken: 1,
@@ -160,7 +173,10 @@ const updatePassword = asyncHandler(async (req, res) => {
 });
 
 const sendOtp = asyncHandler(async (req, res) => {
+  console.log("REQ USER", req.user);
+  console.log("REQ USER", req.user.email);
   const userEmail = req.user?.email;
+  console.log(userEmail);
 
   const user = await User.findOne({ email: userEmail });
 
