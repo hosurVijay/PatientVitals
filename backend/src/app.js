@@ -18,4 +18,7 @@ app.use(cookieParser());
 // User controller Routes
 import userRoute from "./Routes/user.routes.js";
 app.use("/api/v1/user", userRoute);
+
+import patientRouter from "./Routes/patient.routes.js";
+app.use("/api/v1/patient", patientRouter);
 export { app };
