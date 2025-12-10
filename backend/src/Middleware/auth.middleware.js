@@ -3,17 +3,17 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../Utils/apiError.js";
 import { User } from "../Models/user.model.js";
 
-const verifyUser = asyncHandler(async (req, res, next) => {
+const verifyUser = asyncHandler(async (req, res) => {
   const token =
-    req.cookies?.accessToken ||
-    req.header("Authorization")?.replace("Bearer ", "");
+    req.cookie?.accessToken ||
+    req.header("Authorization")?.replace("Bearer", "");
 
   if (!token) {
     throw new ApiError(401, "Unauthorized access.");
   }
-  const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const decodedToken = jwt.verify(token, process.env.Access_Token_Secret);
 
-  const user = await User.findById(decodedToken.id).select(
+  const user = await User.findById(decodedToken._id).select(
     "-password -refreshToken"
   );
   if (!user) {
