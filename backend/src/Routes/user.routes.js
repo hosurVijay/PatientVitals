@@ -19,6 +19,6 @@ router.route("/update/email").post(verifyUser, updateEmail);
 router.route("/update/phone-number").post(verifyUser, updatePhoneNumber);
 router.route("/update/password/otp").post(verifyUser, changePasswordWithOTP);
 router.route("/update/password").post(verifyUser, updatePassword);
-router.route("/send/otp").post(sendOtp);
+router.route("/send/otp").post(verifyUser, sendOtp);
 
 export default router;
