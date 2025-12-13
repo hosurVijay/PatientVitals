@@ -62,6 +62,10 @@ const patientSchema = new Schema(
       default: null,
       trim: true,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
