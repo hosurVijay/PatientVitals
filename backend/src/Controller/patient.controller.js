@@ -16,14 +16,14 @@ const getAllPatients = asyncHandler(async (req, res) => {
   const totalCount = await Patient.countDocuments();
   const totalPages = Math.ceil(totalCount / limit);
 
-  //   if (users.length === 0) {
-  //     return res.status(200).json(new ApiResponse(200, null, "No patient found"));
-  //   }
+  if (users.length === 0) {
+    return res.status(200).json(new ApiResponse(200, null, "No patient found"));
+  }
 
   const data = {
     users,
     totalCount,
-    // totalPages
+    totalPages,
   };
   return res
     .status(200)
@@ -54,9 +54,11 @@ const registerPatient = asyncHandler(async (req, res) => {
     address,
     historyDocReferred: [],
     historyVisit: [],
-    historyPrescription: [],
+    historyPrescription: historyPrescription || [],
     currentPrescription: [],
     currentMedicalStatus: [],
+    avatar: avatar.url,
+    isActive: true,
   });
 
   const fullPatientDetails = await Patient.findOne(patient._id).populate(
@@ -82,4 +84,44 @@ const registerPatient = asyncHandler(async (req, res) => {
     );
 });
 
-export { getAllPatients, registerPatient };
+const getActivePatients = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.skip) || 10;
+  const skip = (page - 1) * limit;
+  const patients = await Patient.find({ isActive: true })
+    .skip(skip)
+    .page(page)
+    .limit(limit)
+    .sort({ _id: -1 })
+    .populate("userId", "-password -refreshToken -otpExpirysIn -resetOtp");
+
+  const totalCount = await Patient.countDocuments({ isActive: true });
+  const totalPages = totalCount / limit;
+  if (patients.length === 0) {
+    new ApiResponse(200, "No active Patients found", null);
+  }
+
+  const data = {
+    patients,
+    totalCount,
+    totalPages,
+  };
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200),
+      data,
+      "All active patient Fetched successfully"
+    );
+});
+
+const updatePatientAvatar = asyncHandler(async (req, res) => {
+  const { avatar } = req.body;
+
+  if (!avatar) {
+    throw new ApiError(400, "Image is required");
+  }
+});
+
+export { getAllPatients, registerPatient, getActivePatients };
