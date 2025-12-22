@@ -4,6 +4,7 @@ import { ApiError } from "../Utils/apiError.js";
 import { ApiResponse } from "../Utils/apiResponse.js";
 import { User } from "../Models/user.model.js";
 import paginate from "express-paginate";
+import { uploadClodinary } from "../Utils/cloudinary.js";
 const getAllPatients = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -46,18 +47,23 @@ const registerPatient = asyncHandler(async (req, res) => {
 
   //   Adding Avatar upload logic later
 
+  const avatarImage = await uploadClodinary(avatar);
+
+  if (!avatarImage) {
+    throw new ApiError(400, "Something went wrong while Seting the avatar");
+  }
+
   const patient = await Patient.create({
     userId: req.user._id,
     age,
     medicalHistory: medicalHistory ? medicalHistory : null,
-    // avatar: avatar.url,
     address,
     historyDocReferred: [],
     historyVisit: [],
     historyPrescription: historyPrescription || [],
     currentPrescription: [],
     currentMedicalStatus: [],
-    avatar: avatar.url,
+    avatar: avatarImage.url,
     isActive: true,
   });
 
@@ -118,10 +124,30 @@ const getActivePatients = asyncHandler(async (req, res) => {
 
 const updatePatientAvatar = asyncHandler(async (req, res) => {
   const { avatar } = req.body;
+  const userId = req.user?._id;
 
   if (!avatar) {
     throw new ApiError(400, "Image is required");
   }
+
+  const updateImage = await uploadClodinary(avatar);
+  if (!updateImage) {
+    throw new ApiError(400, "Failed to update the avatar");
+  }
+  const imageUrl = updateImage.url;
+
+  const updateduser = await Patient.findOneAndUpdate(
+    { userId: userId },
+    { $set: { avatar: imageUrl } },
+    { new: true }
+  );
+
+  res.status(200).json(new ApiResponse(200, "Upaded the Avatar", updateduser));
 });
 
-export { getAllPatients, registerPatient, getActivePatients };
+export {
+  getAllPatients,
+  registerPatient,
+  getActivePatients,
+  updatePatientAvatar,
+};
